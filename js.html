@@ -1,0 +1,135 @@
+---
+layout: default
+title: JS 運行工具
+---
+<nav class="navbar navbar-light bg-light d-flex justify-content-center shadow sticky-top mb-3">
+  <span class="navbar-brand">JS 運行工具</span>
+</nav>
+
+<div class="container">
+
+  <div class="form-group">
+    <textarea class="form-control" id="jscode" placeholder="在這裡輸入 Javascript 代碼..." rows="9">console.log(true);</textarea>
+  </div>
+
+  <button type="button" class="btn btn-outline-secondary btn-lg btn-block mb-3" onClick="submit()">運行代碼！</button>
+
+  <p id="console" class="text-monospace"></p>
+
+</div>
+<script>
+
+  function submit()
+  {
+    $("#console").hide();
+    $("#console").html("");
+    $("#console").fadeIn("fast");
+    try
+    {
+      new Function($("#jscode").val())();
+    }
+    catch (error)
+    {
+      $("#console").html(`Error: ${error.message}`);
+    }
+  }
+  
+  /*
+  https://github.com/mdn/bob/blob/master/editor/js/editor-libs/console-utils.js
+  console.log(undefined);
+  console.log(null);
+  console.log(true);
+  console.log(-0);
+  console.log(1);
+  console.log(2n);
+  console.log("abc");
+  console.log(["abc", [11], {name:"abc"}]);
+  console.log(new String(2));
+  console.log(JSON);
+  console.log(new ArrayBuffer(2));
+  console.log(new Int8Array([0, 1, 2]));
+  console.log(Symbol('foo'));
+  console.log({abc:0});
+  console.log(function(){var i=0;i++});
+  */
+
+  const consoleUtils = {
+    formatArray: function(input)
+    {
+      var output = "";
+      for(var i = 0, l = input.length; i < l; i++)
+      {
+        if(typeof input[i] === "string")output += `"${input[i]}"`;
+        else if(Array.isArray(input[i]))output += `Array [${this.formatArray(input[i])}]`;
+        else output += this.formatOutput(input[i]);
+        if(i < input.length - 1)output += ", ";
+      }
+      return output;
+    },
+
+    formatObject: function(input)
+    {
+      var bufferDataViewRegExp = /^(ArrayBuffer|SharedArrayBuffer|DataView)$/;
+      var complexArrayRegExp = /^(Int8Array|Int16Array|Int32Array|Uint8Array|Uint16Array|Uint32Array|Uint8ClampedArray|Float32Array|Float64Array|BigInt64Array|BigUint64Array)$/;
+      var objectName = input.constructor.name;
+      if(objectName === "String")return `String { "${input.valueOf()}" }`;
+      if(input === JSON)return "JSON {}";
+      if(objectName.match(bufferDataViewRegExp))return `${objectName} {}`;
+      if(objectName.match(complexArrayRegExp))
+      {
+        var arrayLength = input.length;
+        if(arrayLength > 0)return `${objectName} [${this.formatArray(input)}]`;
+        else return `${objectName} []`;
+      }
+      if(objectName === "Symbol" && input !== undefined)return input.toString();
+      if(objectName === "Object")
+      {
+        var formattedChild = "";
+        var start = true;
+        for(var key in input)
+        {
+          if(input.hasOwnProperty(key))
+          {
+            if(start)start = false;
+            else formattedChild += ", ";
+            formattedChild += `${key}: ${this.formatOutput(input[key])}`;
+          }
+        }
+        return `${objectName} { ${formattedChild} }`;
+      }
+      return input;
+    },
+
+    formatOutput: function(input)
+    {
+      if(input === undefined || input === null || typeof input === 'boolean')return String(input);
+      else if(typeof input === "number" && Object.is(input, -0))return "-0";
+      else if(typeof input === "number")return String(input);
+      else if(typeof input === "bigint")return `${String(input)}n`;
+      else if(typeof input === "string")return `"${input}"`;
+      else if(Array.isArray(input))return `Array [${this.formatArray(input)}]`;
+      else return this.formatObject(input);
+    },
+
+    writeOutput: function(content)
+    {
+      $("#console").html(`${$("#console").html()}> ${content}<br>`);
+    }
+  };
+
+  const _consolelog = console.log;
+  const _consoleerror = console.error;
+
+  console.error = function(loggedItem)
+  {
+    consoleUtils.writeOutput(loggedItem);
+    _consoleerror.apply(console, arguments);
+  };
+  console.log = function()
+  {
+    var formattedList = [];
+    for(var i = 0, l = arguments.length; i < l; i++)formattedList.push(consoleUtils.formatOutput(arguments[i]));
+    consoleUtils.writeOutput(formattedList.join(" "));
+    _consolelog.apply(console, arguments);
+  };
+</script>

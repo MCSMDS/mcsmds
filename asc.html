@@ -1,0 +1,124 @@
+---
+layout: default
+title: 平均分計算器
+---
+<nav class="navbar navbar-light bg-light d-flex justify-content-center shadow sticky-top mb-3">
+  <span class="navbar-brand">平均分計算器</span>
+</nav>
+
+<div class="container">
+
+  <div id="sublish">
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <label class="input-group-text" for="subAmount">科目數量</label>
+      </div>
+      <select class="custom-select" id="subAmount">
+        <option value="2">二科</option>
+        <option value="3">三科</option>
+        <option value="4">四科</option>
+        <option value="5">五科</option>
+        <option value="6" selected>六科</option>
+        <option value="7">七科</option>
+        <option value="8">八科</option>
+        <option value="9">九科</option>
+      </select>
+    </div>
+  </div>
+
+  <button type="button" class="btn btn-outline-secondary btn-lg btn-block mb-3" onClick="submit()">提交！</button>
+
+  <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title">提示</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <p id="content1"></p>
+          <p id="content2"></p>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">確定</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var subAmount;
+  $(function(){
+    alert("算法優化！","Update:31-03-2020");
+  });
+  function setSublish()
+  {
+    subAmount = Number($("#subAmount").val());
+    var lishcode = "";
+    for(var i = 0; i < subAmount; i++)
+    {
+      lishcode += `<div class="input-group mb-3">
+      <div class="input-group-prepend">
+      <span class="input-group-text">科目${i+1}:</span>
+      </div>
+      <input type="number" id="n1${i+1}" class="form-control" placeholder="你的分數" aria-label="你的分數">
+      <div class="input-group-append">
+      <span class="input-group-text">/</span>
+      </div>
+      <input type="number" id="n2${i+1}" class="form-control" placeholder="試卷總分" aria-label="試卷總分">
+      </div>`;
+    }
+    $("#sublish").html(lishcode);
+  }
+
+  function submit()
+  {
+    if(!subAmount)
+    {
+      setSublish();
+      return;
+    }
+    var marks1 = 0;
+    var marks2 = 0;
+    var marks3 = 0;
+    const getVal = target => $(target).val() == "" ? -1 : Number($(target).val());
+    const Prec4 = number => new Number(number).toPrecision(4);
+    for(var i = 0; i < subAmount; i++)
+    {
+      const value1 = getVal("#n1" + (i + 1));
+      const value2 = getVal("#n2" + (i + 1));
+      if(value1 < 0 || value2 <= 0 || value1 > value2)
+      {
+        alert("錯誤！", "請檢查您的輸入是否正確！");
+        return;
+      }
+      marks1 += (value1 / value2 * 100);
+      marks2 += (value1);
+      marks3 += (value2);
+    }
+    var marks4 = `統測計法:
+    總分: ${Prec4(marks1)}/${Prec4(subAmount*100)}
+    平均分: ${Prec4(marks1/subAmount)}/100.0`
+    var marks5 = `考試計法:
+    總分: ${Prec4(marks2)}/${Prec4(marks3)}
+    平均分: ${Prec4(marks2/marks3*100)}/100.0`
+    alert(marks4, marks5);
+  }
+
+  function alert(text1, text2)
+  {
+    var modal = $("#modal");
+    modal.find("#content1").html(text1.replace(/\n/g, "<br>"));
+    modal.find("#content2").html(text2.replace(/\n/g, "<br>"));
+    modal.modal("show");
+  }
+
+</script>

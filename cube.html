@@ -1,0 +1,294 @@
+---
+---
+<!doctype html>
+<html lang="zh" class="h-100">
+<head>
+<meta charset="utf-8">
+<title>魔方打亂工具</title>
+<meta name="Description" content="This is a tool website.">
+<meta name="theme-color" content="#FAFAFA">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="stylesheet" href="https://it.mcsmds.tk/assets/styles/bootstrap.css?v={{ "now" | date: "%s" }}">
+<script src="https://it.mcsmds.tk/assets/scripts/jquery.js?v={{ "now" | date: "%s" }}"></script>
+</head>
+<body class="h-100">
+
+<nav class="navbar navbar-light bg-light clearfix d-flex justify-content-center shadow sticky-top mb-3">
+<span class="navbar-brand">魔方打亂工具</span>
+<div class="spinner-border text-secondary" id="spinner" style="display:none"></div>
+</nav>
+
+<div class="container" style="height: calc(100% - 72px);">
+
+<div class="input-group mb-3">
+<div class="input-group-prepend">
+<span class="input-group-text">魔方</span>
+</div>
+<select class="custom-select" id="name">
+<option value="333">三階</option>
+<option value="222">二階</option>
+<option value="444">四階</option>
+<option value="555">五階</option>
+<option value="666">六階</option>
+<option value="777">七階</option>
+<option value="333ni">三盲</option>
+<option value="333fm">最少步</option>
+<option value="333">單手</option>
+<option value="clock">魔表</option>
+<option value="minx">五魔方</option>
+<option value="pyram">金字塔</option>
+<option value="skewb">斜轉</option>
+<option value="sq1">Square-1</option>
+<option value="444ni">四盲</option>
+<option value="555ni">五盲</option>
+<option value="333ni">多盲</option>
+</select>
+<input type="text" id="seed" class="form-control" placeholder="種子" aria-label="種子">
+<div class="input-group-append">
+<button class="btn btn-outline-secondary" type="button" onClick="submit()">提交</button>
+</div>
+</div>
+
+<div style="height: calc(100% - 70px);">
+<div class="h-50 overflow-auto">
+<p id="scramble" style="font-size: small;" class="text-center text-monospace"></p>
+</div>
+<div class="h-50">
+<p id="image" class="h-100 mb-0 mt-1"></p>
+</div>
+</div>
+
+</div>
+
+
+<script src="https://npmcdn.com/parse/dist/parse.min.js?v={{ "now" | date: "%s" }}"></script>
+<!--script type="text/javascript" src="https://unpkg.com/cube-solver@2.4.0/dist/bundle.js?v={{ "now" | date: "%s" }}"></script>
+<script type="text/javascript" src="bundle.js?v={{ "now" | date: "%s" }}"></script-->
+<script>
+$(function(){
+Parse.initialize("KwvJowcwhq4pEZ3TnHTXdSnYVM0swahjEGQ2JjXp","Vz1zLI5rmef8XiNBMERJJgwlSRupUoZ3RMCU8N6A");
+Parse.serverURL="https://data.mcsmds.tk/";
+});
+async function submit()
+{
+$("#spinner").show();
+$("#scramble").text("");
+$("#image").html("");
+const name=$("#name").val();
+const seed=$("#seed").val();
+var scramble=await Parse.Cloud.run("getCubeScramble",{name:name,seed:seed});
+scramble=beautify(name,scramble);
+$("#scramble").html(scramble.replace(/ /g,"&nbsp;"));
+/*
+var solution=getSolution(name,ratings);
+if(solution!=null)
+{
+$("#show5").text("Solution: ");
+$("#show6").html(solution);
+}
+*/
+var image=await Parse.Cloud.run("getCubeImage",{name:name,scramble:scramble.replace(/<br>/g," ")});
+$("#image").html(image);
+$("svg").attr({width:"100%",height:"100%"});
+$("#spinner").hide();
+}
+function beautify(name,scramble)
+{
+scramble=scramble.replace(/\r\n/g," <br>");
+if(Number(name.slice(0,1))==3)
+{
+scramble=scramble.replace(/ /g,"- ");
+scramble=scramble.replace(/2-/g,"2");
+scramble=scramble.replace(/'-/g,"'");
+scramble=scramble.replace(/-/g," ");
+scramble=scramble.slice(0,30)+"<br>"+scramble.slice(30);
+scramble=scramble.replace(/ <br>/g,"<br>");
+}
+if(Number(name.slice(0,1))==4)
+{
+scramble=scramble.replace(/ /g,"- ");
+scramble=scramble.replace(/w-/g,"w ");
+scramble=scramble.replace(/w'-/g,"w'");
+scramble=scramble.replace(/w2-/g,"w2");
+scramble=scramble.replace(/'-/g,"' ");
+scramble=scramble.replace(/2-/g,"2 ");
+scramble=scramble.replace(/-/g,"  ");
+scramble=scramble.slice(0,40)+"<br>"+scramble.slice(40,80)+"<br>"+scramble.slice(80,120)+"<br>"+scramble.slice(120,160)+"<br>"+scramble.slice(160);
+scramble=scramble.replace(/ <br>/g,"<br>");
+}
+if(Number(name.slice(0,1))==5)
+{
+scramble=scramble.replace(/ /g,"- ");
+scramble=scramble.replace(/w-/g,"w ");
+scramble=scramble.replace(/w'-/g,"w'");
+scramble=scramble.replace(/w2-/g,"w2");
+scramble=scramble.replace(/'-/g,"' ");
+scramble=scramble.replace(/2-/g,"2 ");
+scramble=scramble.replace(/-/g,"  ");
+scramble=scramble.slice(0,40)+"<br>"+scramble.slice(40,80)+"<br>"+scramble.slice(80,120)+"<br>"+scramble.slice(120,160)+"<br>"+scramble.slice(160,200)+"<br>"+scramble.slice(200);
+scramble=scramble.replace(/ <br>/g,"<br>");
+}
+if(Number(name.slice(0,1))==6||Number(name.slice(0,1))==7)
+{
+var newscr=scramble.slice(0,find(scramble,' ',10))+" <br>";
+for(var i=10;i<scramble.match(/ /g).length;i+=10)
+{
+newscr+=scramble.slice(find(scramble,' ',i),find(scramble,' ',i+10))+" <br>";
+}
+scramble=newscr.replace(/<br> /g,"<br>");
+scramble=scramble.replace(/ /g,"- ");
+scramble=scramble.replace(/w-/g,"w  ");
+scramble=scramble.replace(/w'-/g,"w' ");
+scramble=scramble.replace(/w2-/g,"w2 ");
+scramble=scramble.replace(/'-/g,"'  ");
+scramble=scramble.replace(/2-/g,"2  ");
+scramble=scramble.replace(/-/g,"   ");
+
+scramble=scramble.replace(/3Uw2 /g,"3Uw2");
+scramble=scramble.replace(/3Dw2 /g,"3Dw2");
+scramble=scramble.replace(/3Lw2 /g,"3Lw2");
+scramble=scramble.replace(/3Rw2 /g,"3Rw2");
+scramble=scramble.replace(/3Fw2 /g,"3Fw2");
+scramble=scramble.replace(/3Bw2 /g,"3Bw2");
+scramble=scramble.replace(/3Uw' /g,"3Uw2");
+scramble=scramble.replace(/3Dw' /g,"3Dw2");
+scramble=scramble.replace(/3Lw' /g,"3Lw2");
+scramble=scramble.replace(/3Rw' /g,"3Rw2");
+scramble=scramble.replace(/3Fw' /g,"3Fw2");
+scramble=scramble.replace(/3Bw' /g,"3Bw2");
+scramble=scramble.replace(/3Uw  /g,"3Uw2");
+scramble=scramble.replace(/3Dw  /g,"3Dw2");
+scramble=scramble.replace(/3Lw  /g,"3Lw2");
+scramble=scramble.replace(/3Rw  /g,"3Rw2");
+scramble=scramble.replace(/3Fw  /g,"3Fw2");
+scramble=scramble.replace(/3Bw  /g,"3Bw2");
+
+scramble=scramble.replace(/ <br>/g,"<br>");
+}
+if(name=="clock")
+{
+scramble=scramble.replace(/y/g,"<br>y");
+}
+if(name=="minx")
+{
+scramble=scramble.replace(/U/g,"U <br>");
+scramble=scramble.replace(/U <br>'/g,"U'<br>");
+scramble=scramble.replace(/<br> /g,"<br>");
+}
+if(name=="sq1")
+{
+scramble=scramble.slice(0,find(scramble,'/',6)+1)+"<br>"+scramble.slice(find(scramble,'/',6)+1);
+scramble=scramble.replace(/<br> /g,"<br>");
+}
+return scramble;
+}
+function find(str,cha,num){
+var x=str.indexOf(cha);
+for(var i=0;i<num-1;i++){
+x=str.indexOf(cha,x+1);
+}
+return x;
+}
+
+
+
+
+
+
+function getSolution(name,ratings)
+{
+if(name=="333")
+{
+var cross=cubeSolver.solve("z2 "+ratings,"cross");
+var i1="<p>z2 // inspection</p>";
+var i2="<p>"+generate(cross)+" // cross</p>";
+return i1+i2;
+}
+if(name=="222")
+{
+var face=cubeSolver.solve("z2 "+ratings,"pl");
+var tcll=cubeSolver.solve("z2 "+ratings,"pt");
+var guimond=cubeSolver.solve("z2 "+ratings,"pg");
+var i1="<p>z2 // inspection</p>";
+var i2="<p>"+generate(face)+" // Layer</p>";
+var i3="<p>"+generate(tcll)+" // Guimond</p>";
+var i4="<p>"+generate(guimond)+" // TCLL</p>";
+return i1+i2+i3+i4;
+}
+}
+
+
+ALG_POW = Array ('', "2", "'");
+XTR = Array('B',  'R',  'U',  'F',  'L',  'D',  'b',  'r',  'u',  'f',  'l',  'd',  'S',  'M',  'E-', 'x',  'z-', 'y' );
+YTR = Array('U',  'F',  'L',  'D',  'B',  'R',  'u',  'f',  'l',  'd',  'b',  'r',  'E',  'S-', 'M',  'z',  'y',  'x-');
+ZTR = Array('R',  'D',  'F',  'L',  'U',  'B',  'r',  'd',  'f',  'l',  'u',  'b',  'M',  'E-', 'S',  'y-', 'x',  'z' );
+function move_id(move){
+switch(move){
+case 'U': return 0;
+case 'R': return 1;
+case 'F': return 2;
+case 'D': return 3;
+case 'L': return 4;
+case 'B': return 5;
+case 'u': return 6;
+case 'r': return 7;
+case 'f': return 8;
+case 'd': return 9;
+case 'l': return 10;
+case 'b': return 11;
+case 'E': return 12;
+case 'M': return 13;
+case 'S': return 14;
+case 'x': return 15;
+case 'y': return 16;
+case 'z': return 17;
+}
+return -1;
+}
+function move_pow(chr){
+switch(chr){
+case "2" : return 1;
+case "'" : return 2;
+case "3" : return 2;
+}
+return 0;
+}
+
+function generate(alg){
+//trans_alg(alg, XTR);
+//trans_alg(alg, YTR);
+var aaa=trans_alg(alg, ZTR);
+return trans_alg(aaa, ZTR);
+}
+
+function trans_alg(alg,trn)
+{
+var out='';
+for(var i=0;i<alg.length;i++){
+var move = move_id(alg.substr(i, 1));
+if(move != -1)
+{
+pow = 0;
+if(i < alg.length -1) pow = move_pow(alg.substr(i + 1, 1));
+out += trn[move].substr(0,1) + (trn[move].length > 1 ?
+ALG_POW[2 - pow] : ALG_POW[pow]) + " ";
+}
+}
+return out;
+}
+
+
+
+
+
+
+
+
+</script>
+<script src="https://it.mcsmds.tk/assets/scripts/bootstrap.js?v={{ "now" | date: "%s" }}"></script>
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>MathML</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"/>
+<link rel="stylesheet" href="https://it.mcsmds.tk/assets/styles/bootstrap.css"/>	
+<script src="https://it.mcsmds.tk/assets/scripts/jquery.js"></script>
+<script src="https://it.mcsmds.tk/assets/scripts/bootstrap.js"></script>
+<script>
+  MathJax = {
+    loader: {
+      load: [
+        'input/tex-base', '[tex]/newcommand', '[tex]/action',
+        'output/chtml',
+        'a11y/explorer'
+      ]
+    },
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      packages: ['base', 'newcommand', 'action']
+    }
+  };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/startup.js"></script>
+</head>
+<body>
+  
+<nav class="navbar navbar-light bg-light d-flex justify-content-center shadow sticky-top mb-3">
+<span class="navbar-brand" id="title">MathML</span>
+</nav>
+
+<div class="container">
+
+<p>
+$$x = {-b \pm \sqrt{\texttip{b^2-4ac}{descriminant}} \over 2a}$$
+</p>
+
+</div>
+</body>
+</html>
