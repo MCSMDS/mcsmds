@@ -3,7 +3,7 @@ layout: default
 title: 平均分計算器
 ---
 <nav class="navbar navbar-light bg-light d-flex justify-content-center shadow sticky-top mb-3">
-  <span class="navbar-brand">平均分計算器</span>
+  <span class="navbar-brand">{{ page.title }}</span>
 </nav>
 
 <div class="container">
@@ -54,6 +54,8 @@ title: 平均分計算器
 
 </div>
 
+
+{% capture script %}
 <script>
   var subAmount;
   $(function(){
@@ -122,3 +124,4 @@ title: 平均分計算器
   }
 
 </script>
+{% endcapture %}
