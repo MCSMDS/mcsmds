@@ -15,6 +15,6 @@
       <script src="https://it.mcsmds.tk/assets/scripts/bootstrap.js?v={{ "now" | date: "%s" }}"></script>
       <script>
     {%- endcapture -%}
-    {{ content | replace: "<script>", script }}
+    {{- content | replace: "<script>", script -}}
   </body>
 </html>
